@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { supabase } from "./supabaseClient.js";
 import {
@@ -632,8 +633,8 @@ function LoginScreen({ recoveryMode }) {
     <div className="login-screen">
       <div className="login-left">
         <div className="login-brand-row">
-          <div className="login-mark"><Icon.mountain width={20} height={20} /></div>
-          <span className="brand-wordmark">Road to <span className="b2">90</span></span>
+          <div className="login-mark"><img src="/icon.png" alt="Tracker Language" className="login-mark-img" /></div>
+          <span className="brand-wordmark">Tracker <span className="b2">Language</span></span>
         </div>
         <div className="login-hero">
           <h1>Ogni giorno<br /><span>una tappa.</span></h1>
@@ -837,8 +838,8 @@ export default function App() {
       <div className="hero">
         <div className="hero-top">
           <div className="hero-brand">
-            <div className="hero-mark"><Icon.mountain width={22} height={22} stroke="#F3F0E4" /></div>
-            <div><h1>Road to 90</h1><div className="sub">Diario dei minuti &amp; habit tracker</div></div>
+            <div className="hero-mark"><img src="/icon.png" alt="Tracker Language" className="hero-mark-img" /></div>
+            <div><h1>Tracker Language</h1><div className="sub">Diario dei minuti &amp; habit tracker</div></div>
           </div>
           <div className="hero-actions">
             <button className="icon-btn-hero" title="Impostazioni" onClick={() => setSettingsOpen(true)}><Icon.gear width={16} height={16} /></button>
@@ -907,7 +908,8 @@ button{font-family:inherit;}
 .hero{background:linear-gradient(160deg,var(--pine) 0%,var(--pine-deep) 100%);color:#F3F0E4;margin:0 -20px 0;padding:34px 20px 26px;border-radius:0 0 22px 22px;position:relative;overflow:hidden;}
 .hero-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;position:relative;z-index:1;}
 .hero-brand{display:flex;align-items:center;gap:12px;}
-.hero-mark{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.18);flex-shrink:0;}
+.hero-mark{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.18);flex-shrink:0;overflow:hidden;}
+.hero-mark-img{width:100%;height:100%;object-fit:cover;}
 .hero-brand h1{font-size:21px;font-weight:800;color:#fff;}
 .hero-brand .sub{font-size:11.5px;color:#CFE0D2;text-transform:uppercase;letter-spacing:0.09em;margin-top:1px;}
 .hero-actions{display:flex;gap:8px;}
@@ -1028,7 +1030,8 @@ tbody tr:hover td{background:var(--panel-alt);}
 .login-left{flex:1.3;display:flex;flex-direction:column;justify-content:center;padding:60px 70px;position:relative;overflow:hidden;min-width:0;}
 .login-left::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(95,143,107,0.10), transparent 45%),radial-gradient(circle at 80% 80%, rgba(193,137,58,0.08), transparent 45%);}
 .login-brand-row{display:flex;align-items:center;gap:10px;z-index:1;margin-bottom:40px;position:relative;}
-.login-mark{width:38px;height:38px;border-radius:9px;background:var(--pine);color:#F3F0E4;display:flex;align-items:center;justify-content:center;}
+.login-mark{width:38px;height:38px;border-radius:9px;background:var(--pine);color:#F3F0E4;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.login-mark-img{width:100%;height:100%;object-fit:cover;}
 .login-brand-row .brand-wordmark{font-family:'Bitter',serif;font-weight:700;font-size:16px;}
 .login-brand-row .brand-wordmark .b2{color:var(--moss-deep);}
 .login-hero{z-index:1;max-width:480px;position:relative;}
