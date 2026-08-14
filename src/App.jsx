@@ -77,7 +77,9 @@ const Icon = {
   logout: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></svg>,
   mountain: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21 L9 9 L13 15 L17 6 L21 21 Z" /></svg>,
   sun: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" /></svg>,
-  moon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>
+  moon: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>,
+  calendar: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M3 10h18M8 2v4M16 2v4" /></svg>,
+  list: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
 };
 
 /* ============================== TOAST ============================== */
@@ -272,7 +274,19 @@ function DayDetailModal({ data, onClose, onGoToForm }) {
   );
 }
 
+/* ============================== VIEW SWITCH (Calendario / Registro) ============================== */
 
+function ViewSwitch({ view, setView, title }) {
+  return (
+    <div className="page-head">
+      <h2>{title}</h2>
+      <div className="view-switch">
+        <button className={view === "cal" ? "active" : ""} onClick={() => setView("cal")}><Icon.calendar width={14} height={14} />Calendario</button>
+        <button className={view === "reg" ? "active" : ""} onClick={() => setView("reg")}><Icon.list width={14} height={14} />Registro</button>
+      </div>
+    </div>
+  );
+}
 
 function StatCard({ label, value, tone }) {
   return (
@@ -286,6 +300,7 @@ function StatCard({ label, value, tone }) {
 /* ============================== PAGE 1 — MINUTI ============================== */
 
 function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }) {
+  const [view, setView] = useState("cal");
   const [cursor, setCursor] = useState(new Date());
   const [editingId, setEditingId] = useState(null);
   const [date, setDate] = useState(todayStr());
@@ -344,6 +359,8 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
 
   return (
     <div>
+      <ViewSwitch view={view} setView={setView} title="Minuti Giornalieri" />
+      {view === "cal" && (
       <div className="stat-row">
         <StatCard label="Giorni registrati" value={sorted.length} />
         <StatCard label="Totale minuti" value={totalMin} />
@@ -352,7 +369,9 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
         <StatCard label="Giorni Verdi" value={verdeCount} tone="verde" />
         <StatCard label="Giorni Rossi" value={rossoCount} tone="rosso" />
       </div>
+      )}
 
+      {view === "cal" && (
       <div className="section">
         <div className="section-head"><div><span className="eyebrow">Profilo del percorso</span><h3>Andamento minuti per giorno</h3></div></div>
         <RidgeChart entries={entries} settings={settings} dark={dark} />
@@ -362,7 +381,9 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
           <span><i style={{ background: "var(--rust)" }}></i>Rosso — sotto soglia</span>
         </div>
       </div>
+      )}
 
+      {view === "cal" && (
       <div className="section">
         <div className="section-head"><div><span className="eyebrow">Calendario</span><h3>Registro giornaliero</h3></div></div>
         <MiniCalendar
@@ -372,6 +393,7 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
           onDayClick={(d, entry) => setDrillDay({ date: d, kind: "minuti", entry, settings })}
         />
       </div>
+      )}
 
       <div className="section" ref={formRef}>
         <div className="section-head"><div><span className="eyebrow">{editingId ? "Modifica voce" : "Nuova voce"}</span><h3>{editingId ? "Modifica la giornata" : "Registra la giornata"}</h3></div></div>
@@ -397,6 +419,7 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
         </div>
       </div>
 
+      {view === "reg" && (
       <div className="section">
         <div className="section-head"><div><span className="eyebrow">Registro</span><h3>Tutte le giornate</h3></div></div>
         <div className="table-wrap">
@@ -441,6 +464,7 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
           </table>
         </div>
       </div>
+      )}
 
       <DayDetailModal data={drillDay} onClose={() => setDrillDay(null)} onGoToForm={jumpToForm} />
     </div>
@@ -450,6 +474,7 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
 /* ============================== PAGE 2 — HABIT TRACKER ============================== */
 
 function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
+  const [view, setView] = useState("cal");
   const [cursor, setCursor] = useState(new Date());
   const [editingId, setEditingId] = useState(null);
   const [date, setDate] = useState(todayStr());
@@ -507,13 +532,17 @@ function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
 
   return (
     <div>
+      <ViewSwitch view={view} setView={setView} title="Habit Tracker" />
+      {view === "cal" && (
       <div className="stat-row">
         <StatCard label="Giorni tracciati" value={sorted.length} />
         <StatCard label="Media spunte" value={`${avgSpunte.toFixed(1)} / ${habits.length}`} />
         <StatCard label="Giorni perfetti" value={perfectDays} tone="verde" />
         <StatCard label="Giorni critici" value={rossoDays} tone="rosso" />
       </div>
+      )}
 
+      {view === "cal" && (
       <div className="section">
         <div className="section-head"><div><span className="eyebrow">Calendario</span><h3>Le tue tappe</h3></div></div>
         <MiniCalendar
@@ -523,6 +552,7 @@ function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
           onDayClick={(d, entry) => setDrillDay({ date: d, kind: "habit", entry, habits })}
         />
       </div>
+      )}
 
       <div className="section" ref={formRef}>
         <div className="section-head">
@@ -558,6 +588,7 @@ function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
         </div>
       </div>
 
+      {view === "reg" && (
       <div className="section">
         <div className="section-head"><div><span className="eyebrow">Registro</span><h3>Tutte le giornate</h3></div></div>
         <div className="table-wrap">
@@ -602,6 +633,7 @@ function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
           </table>
         </div>
       </div>
+      )}
 
       <DayDetailModal data={drillDay} onClose={() => setDrillDay(null)} onGoToForm={jumpToForm} />
     </div>
@@ -1096,6 +1128,13 @@ button{font-family:inherit;}
 .tab-btn.active{background:var(--pine);border-color:var(--pine);color:#fff;}
 .tab-btn.active .tab-num{border-color:rgba(255,255,255,0.4);color:#fff;}
 
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.page-head h2{font-size:17px;}
+.view-switch{display:flex;gap:6px;background:var(--panel-alt);border:1px solid var(--line);border-radius:10px;padding:4px;}
+.view-switch button{display:flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--ink-dim);padding:8px 14px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;}
+.view-switch button:hover{color:var(--ink);}
+.view-switch button.active{background:var(--pine);color:#fff;}
+
 .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
 .stat-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 14px;}
 .stat-card .l{font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);margin-bottom:5px;font-weight:600;}
@@ -1238,3 +1277,4 @@ tbody tr:hover td{background:var(--panel-alt);}
   .cal-cell .tag{display:none;}
 }
 `;
+
