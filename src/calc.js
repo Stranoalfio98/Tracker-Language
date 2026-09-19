@@ -126,6 +126,49 @@ export function p2Icon(status) {
   return status === "verde" ? "\u2714" : status === "giallo" ? "\uD83D\uDFE1" : "\u2717";
 }
 
+/* ---------- Road count (riparte da 0 dopo 2+ giorni saltati consecutivi) ---------- */
+
+function parseIsoDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function daysBetweenDates(fromIso, toIso) {
+  return Math.round((parseIsoDate(toIso) - parseIsoDate(fromIso)) / 86400000);
+}
+
+// Conteggio progressivo "Road to N": un solo giorno saltato tra due giornate
+// registrate non interrompe il conteggio (continua a salire), ma 2 o più
+// giorni saltati consecutivi lo fanno ripartire da 1 dalla giornata successiva.
+// sortedEntries deve essere ordinato per data crescente, con date uniche.
+export function computeRunningCounts(sortedEntries) {
+  const result = [];
+  let count = 0;
+  let prevDate = null;
+  sortedEntries.forEach((e) => {
+    if (prevDate === null) {
+      count = 1;
+    } else {
+      const gap = daysBetweenDates(prevDate, e.date);
+      count = gap <= 2 ? count + 1 : 1;
+    }
+    result.push({ id: e.id, date: e.date, count });
+    prevDate = e.date;
+  });
+  return result;
+}
+
+// Valore "live" ad oggi: se sono già passati 2 o più giorni interi dall'ultima
+// giornata registrata (senza che tu abbia ancora inserito nulla), il conteggio
+// è già tornato a 0 anche prima di registrare la prossima giornata.
+export function computeCurrentCount(sortedEntries) {
+  if (sortedEntries.length === 0) return 0;
+  const runs = computeRunningCounts(sortedEntries);
+  const last = sortedEntries[sortedEntries.length - 1];
+  if (daysBetweenDates(last.date, todayStr()) >= 3) return 0;
+  return runs[runs.length - 1].count;
+}
+
 /* ---------- Streak ---------- */
 
 export function computeStreak(sortedEntries) {
