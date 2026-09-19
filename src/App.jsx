@@ -4,7 +4,7 @@ import {
   DAY_NAMES_SHORT, MONTH_NAMES, DEFAULT_SETTINGS, defaultHabits, genId,
   isoDate, todayStr, fmtHM, fmtDateIt, buildMonthGrid,
   p1Total, p1Status, p1Arrow, sortByDate, isActiveOn, activeCategoriesFor, activeHabitsFor,
-  p2Counts, p2Status, p2Icon, computeStreak
+  p2Counts, p2Status, p2Icon, computeStreak, computeRunningCounts, computeCurrentCount
 } from "./calc.js";
 
 /* ============================== DB MAPPERS ============================== */
@@ -310,7 +310,12 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
   const pendingDateRef = useRef(null);
 
   const sorted = useMemo(() => sortByDate(entries), [entries]);
-  const ascendingIds = sorted.map((e) => e.id);
+  const roadCounts = useMemo(() => computeRunningCounts(sorted), [sorted]);
+  const roadCountById = useMemo(() => {
+    const m = {};
+    roadCounts.forEach((r) => { m[r.id] = r.count; });
+    return m;
+  }, [roadCounts]);
 
   function jumpToForm(d) {
     setDrillDay(null);
@@ -432,7 +437,7 @@ function Page1({ entries, settings, upsertEntry, deleteEntry, askConfirm, dark }
             <tbody>
               {sorted.length === 0 && <tr><td colSpan={5 + settings.categories.length} className="empty-row">Nessuna giornata registrata ancora.</td></tr>}
               {[...sorted].reverse().map((e) => {
-                const dayNum = ascendingIds.indexOf(e.id) + 1;
+                const dayNum = roadCountById[e.id] || 1;
                 const total = p1Total(e, settings);
                 const status = p1Status(total, settings);
                 return (
@@ -484,7 +489,12 @@ function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
   const pendingDateRef = useRef(null);
 
   const sorted = useMemo(() => sortByDate(entries), [entries]);
-  const ascendingIds = sorted.map((e) => e.id);
+  const roadCounts = useMemo(() => computeRunningCounts(sorted), [sorted]);
+  const roadCountById = useMemo(() => {
+    const m = {};
+    roadCounts.forEach((r) => { m[r.id] = r.count; });
+    return m;
+  }, [roadCounts]);
 
   function jumpToForm(d) {
     setDrillDay(null);
@@ -601,7 +611,7 @@ function Page2({ entries, habits, upsertEntry, deleteEntry, askConfirm }) {
             <tbody>
               {sorted.length === 0 && <tr><td colSpan={5 + habits.length} className="empty-row">Nessuna giornata registrata ancora.</td></tr>}
               {[...sorted].reverse().map((e) => {
-                const dayNum = ascendingIds.indexOf(e.id) + 1;
+                const dayNum = roadCountById[e.id] || 1;
                 const { spunte, saltate } = p2Counts(e, habits);
                 const status = p2Status(e, habits);
                 return (
@@ -996,7 +1006,8 @@ export default function App() {
 
   const sortedMinuti = useMemo(() => sortByDate(minutiEntries), [minutiEntries]);
   const sortedHabits = useMemo(() => sortByDate(habitEntries), [habitEntries]);
-  const progressPct = Math.min(100, Math.round((sortedMinuti.length / settings.targetDays) * 100));
+  const roadCount = useMemo(() => computeCurrentCount(sortedMinuti), [sortedMinuti]);
+  const progressPct = Math.min(100, Math.round((roadCount / settings.targetDays) * 100));
   const streak1 = computeStreak(sortedMinuti);
   const streak2 = computeStreak(sortedHabits);
   const totalMin = sortedMinuti.reduce((s, e) => s + p1Total(e, settings), 0);
@@ -1028,7 +1039,7 @@ export default function App() {
         <div className="hero-progress">
           <div className="hero-progress-row">
             <span className="hero-progress-label">Traguardo dei {settings.targetDays} giorni</span>
-            <span className="hero-progress-value mono">{sortedMinuti.length} / {settings.targetDays}</span>
+            <span className="hero-progress-value mono" title="Un giorno saltato non interrompe il conteggio; due o più di seguito lo fanno ripartire da 0.">{roadCount} / {settings.targetDays}</span>
           </div>
           <div className="hero-track"><div className="hero-fill" style={{ width: progressPct + "%" }} /></div>
         </div>
